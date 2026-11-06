@@ -1,0 +1,18 @@
+name: CH-DamageSkin
+main: com.ch.damageskin.CHDamageSkin
+version: 1.0
+api-version: '1.21'
+description: 리소스팩 폰트로 몹에게 준 데미지를 숫자 스킨으로 표시
+commands:
+  데미지스킨:
+    description: 내 데미지 스킨 선택 GUI
+    aliases: [damageskin, ds]
+    usage: /데미지스킨
+  데미지스킨관리:
+    description: 데미지 스킨 등록 / 삭제 / 아이템 받기
+    aliases: [damageskinadmin, dsa]
+    usage: /데미지스킨관리 <등록|삭제|목록|받기>
+permissions:
+  chdamageskin.admin:
+    description: 데미지 스킨 관리
+    default: op

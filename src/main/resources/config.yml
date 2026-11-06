@@ -1,0 +1,18 @@
+# 스킨을 장착하지 않은 유저에게 보여줄 기본 폰트 (리소스팩 assets/minecraft/font/<이름>.json)
+# 비워두면("") 스킨을 장착한 유저에게만 데미지가 표시됩니다.
+default-skin: default
+
+# true = 때린 본인에게만 데미지 숫자가 보임 / false = 주변 모두에게 보임
+only-attacker: true
+
+# 숫자가 떠 있는 시간(틱, 20틱 = 1초)
+duration-ticks: 25
+
+# 숫자가 위로 올라가는 높이(블록)
+rise: 1.2
+
+# 숫자 크기 배율
+scale: 1.5
+
+# 숫자가 뜨는 위치를 좌우로 흩뿌리는 범위(블록)
+random-offset: 0.4
