@@ -12,7 +12,7 @@ commands:
   데미지스킨관리:
     description: 데미지 스킨 등록 / 삭제 / 아이템 받기
     aliases: [damageskinadmin, dsa]
-    usage: /데미지스킨관리 <등록|삭제|목록|받기>
+    usage: /데미지스킨관리 <등록|삭제|목록|받기|리로드>
 permissions:
   chdamageskin.admin:
     description: 데미지 스킨 관리

@@ -66,6 +66,8 @@ messages:
   help-give: '&e/데미지스킨관리 받기 <폰트> [개수]  &7- 스킨 아이템 받기'
   help-delete: '&e/데미지스킨관리 삭제 <폰트>  &7- 등록 삭제'
   help-list: '&e/데미지스킨관리 목록  &7- 등록된 스킨 목록'
+  help-reload: '&e/데미지스킨관리 리로드  &7- config.yml 다시 불러오기'
+  reload-done: '&aconfig.yml 과 스킨 목록을 다시 불러왔습니다. &7(스킨 {count}개)'
   sneak-hint: '&e웅크리고(Shift) 우클릭하면 데미지 스킨이 등록됩니다.'
   skin-deleted: '&c삭제된 데미지 스킨입니다.'
   already-owned: '&c이미 보유한 데미지 스킨입니다.'

@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class SkinCommand implements CommandExecutor, TabCompleter {
 
-    private static final List<String> SUBS = Arrays.asList("등록", "삭제", "목록", "받기");
+    private static final List<String> SUBS = Arrays.asList("등록", "삭제", "목록", "받기", "리로드");
 
     private final CHDamageSkin plugin;
 
@@ -46,6 +46,12 @@ public class SkinCommand implements CommandExecutor, TabCompleter {
         }
         SkinManager sm = plugin.skins();
         String sub = args[0];
+
+        if (sub.equals("리로드")) {
+            plugin.reload();
+            CHDamageSkin.msg(sender, "reload-done", "&aconfig.yml 과 스킨 목록을 다시 불러왔습니다. &7(스킨 {count}개)", "count", String.valueOf(plugin.skins().fonts().size()));
+            return true;
+        }
 
         if (sub.equals("목록")) {
             if (sm.fonts().isEmpty()) {
@@ -137,6 +143,7 @@ public class SkinCommand implements CommandExecutor, TabCompleter {
         CHDamageSkin.msg(s, "help-give", "&e/데미지스킨관리 받기 <폰트> [개수]  &7- 스킨 아이템 받기");
         CHDamageSkin.msg(s, "help-delete", "&e/데미지스킨관리 삭제 <폰트>  &7- 등록 삭제");
         CHDamageSkin.msg(s, "help-list", "&e/데미지스킨관리 목록  &7- 등록된 스킨 목록");
+        CHDamageSkin.msg(s, "help-reload", "&e/데미지스킨관리 리로드  &7- config.yml 다시 불러오기");
     }
 
     @Override

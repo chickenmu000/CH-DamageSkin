@@ -5,6 +5,7 @@ import net.kyori.adventure.text.TextReplacementConfig;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class CHDamageSkin extends JavaPlugin {
@@ -20,8 +21,7 @@ public class CHDamageSkin extends JavaPlugin {
         skins = new SkinManager(this);
         skins.load();
 
-        damageListener = new DamageListener(this);
-        getServer().getPluginManager().registerEvents(damageListener, this);
+        registerDamageListener();
         getServer().getPluginManager().registerEvents(new SkinListener(this), this);
 
         SkinCommand cmd = new SkinCommand(this);
@@ -34,6 +34,23 @@ public class CHDamageSkin extends JavaPlugin {
     public void onDisable() {
         if (damageListener != null) damageListener.clearDisplays();
         if (skins != null) skins.save();
+    }
+
+    private void registerDamageListener() {
+        damageListener = new DamageListener(this);
+        getServer().getPluginManager().registerEvents(damageListener, this);
+    }
+
+    /** config.yml / 스킨 목록 다시 읽기 (packet-mode 포함) */
+    public void reload() {
+        skins.save();
+        reloadConfig();
+        skins.load();
+        if (damageListener != null) {
+            damageListener.clearDisplays();
+            HandlerList.unregisterAll(damageListener);
+        }
+        registerDamageListener();
     }
 
     private void bind(String name, SkinCommand cmd) {
