@@ -63,6 +63,16 @@ public class DamageListener implements Listener {
         if (font == null) return;
         Key key = SkinManager.fontKey(font);
 
+        // 치명타 : 스크립트/플러그인이 markCrit 으로 표시해 둔 타격
+        boolean crit = plugin.getConfig().getBoolean("crit.enabled", true)
+                && plugin.consumeCrit(attacker.getUniqueId(), victim.getUniqueId());
+        if (crit) {
+            String cf = plugin.getConfig().getString("crit.font", "");
+            if (cf != null && !cf.isEmpty() && SkinManager.validFont(cf)) key = SkinManager.fontKey(cf);
+        }
+        final Key fkey = key;
+        final boolean fcrit = crit;
+
         if (plugin.getConfig().getBoolean("actual-damage-mode", false)) {
             // 피해가 적용된 뒤(1틱 후) 체력 차이로 실제 피해량 계산
             double before = victim.getHealth();
@@ -71,14 +81,14 @@ public class DamageListener implements Listener {
                 double after = (victim.isDead() || !victim.isValid()) ? 0 : victim.getHealth();
                 long actual = Math.round(before - after);
                 if (actual <= 0) return;
-                show(atk, victim, actual, key);
+                show(atk, victim, actual, fkey, fcrit);
             }, 1L);
         } else {
-            show(attacker, victim, Math.max(1, Math.round(dmg)), key);
+            show(attacker, victim, Math.max(1, Math.round(dmg)), fkey, fcrit);
         }
     }
 
-    private void show(Player attacker, LivingEntity victim, long value, Key font) {
+    private void show(Player attacker, LivingEntity victim, long value, Key font, boolean crit) {
         var cfg = plugin.getConfig();
         double off = cfg.getDouble("random-offset", 0.4);
         double yOff = cfg.getDouble("offset", 0.0);
@@ -102,7 +112,7 @@ public class DamageListener implements Listener {
             }
         }
 
-        Anim anim = Anim.read(cfg);
+        Anim anim = Anim.read(cfg, crit);
         if (packetRenderer != null) {
             try {
                 packetRenderer.show(attacker, others, opacity, loc, value, font, anim);

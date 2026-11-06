@@ -11,6 +11,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class CHDamageSkin extends JavaPlugin {
 
     private static CHDamageSkin inst;
+    /** 치명타 표시 대기: 공격자 UUID + 피해자 UUID -> 만료 시각(ms) */
+    private final java.util.Map<String, Long> crits = new java.util.concurrent.ConcurrentHashMap<>();
     private SkinManager skins;
     private DamageListener damageListener;
 
@@ -34,6 +36,25 @@ public class CHDamageSkin extends JavaPlugin {
     public void onDisable() {
         if (damageListener != null) damageListener.clearDisplays();
         if (skins != null) skins.save();
+    }
+
+    /**
+     * 다른 플러그인/스크립트(skript-reflect)에서 호출: 이번 타격을 치명타로 표시.
+     * 피해 이벤트가 처리될 때(같은 틱) 치명타 스타일로 숫자를 띄웁니다.
+     */
+    public static void markCrit(org.bukkit.entity.Player attacker, org.bukkit.entity.Entity victim) {
+        if (inst == null || attacker == null || victim == null) return;
+        if (inst.crits.size() > 256) {
+            long now = System.currentTimeMillis();
+            inst.crits.values().removeIf(t -> t < now);
+        }
+        inst.crits.put(attacker.getUniqueId() + ":" + victim.getUniqueId(), System.currentTimeMillis() + 500);
+    }
+
+    /** 표시된 치명타를 확인하고 소모 */
+    boolean consumeCrit(java.util.UUID attacker, java.util.UUID victim) {
+        Long t = crits.remove(attacker + ":" + victim);
+        return t != null && t >= System.currentTimeMillis();
     }
 
     private void registerDamageListener() {

@@ -74,10 +74,23 @@ Paper 1.21.x 용 **데미지 스킨 플러그인**입니다. 플레이어가 몹
 | `random-offset` | `0.4` | 숫자 위치를 흩뿌리는 범위(블록) |
 | `scale` | `1.5` | 숫자 기본 크기 배율 |
 | `animation.*` | - | 커졌다가(`pop-scale`) → 줄어들고(`settle-scale`) → 머문 뒤(`stay-ticks`) 위로 올라가며(`rise`, `rise-ticks`) 어두워지는(`colors`) 애니메이션 |
+| `crit.*` | - | 치명타 폰트(`font`) / 크기 배율(`scale-multiplier`) / 색(`colors`). 위 "치명타 표시" 참고 |
 | `modelengine.enabled` / `height-scale` | `true` / `1.0` | ModelEngine 모델 높이 보정 |
 | `messages.*` | - | 모든 메시지, GUI 제목·버튼, 스킨 아이템 이름·설명 (`&` 색코드, `{name}` = 스킨 이름) |
 
 > 기존 서버는 `config.yml` 이 자동으로 갱신되지 않습니다. 새 항목을 쓰려면 `config.yml` 을 지우고 재시작하거나 위 항목을 직접 추가하세요. (없는 항목은 기본값으로 동작합니다)
+
+## 치명타 표시
+치명타 판정은 이 플러그인이 하지 않습니다. 치명타를 계산하는 스크립트에서 치명타가 터진 순간 **같은 틱 안에** 아래를 호출하면, 그 타격은 치명타 스타일로 표시됩니다. (skript-reflect)
+```
+import:
+    com.ch.damageskin.CHDamageSkin
+
+# 치명타로 판정된 곳에서
+CHDamageSkin.markCrit({_player}, {_target})
+```
+- `crit.font` 에 폰트를 넣으면 치명타만 다른 폰트로, `crit.scale-multiplier` 로 크기를, `crit.colors` 로 색을 바꿀 수 있습니다.
+- 표시는 0.5초 안에 피해 이벤트가 처리될 때만 유효합니다.
 
 ## 데이터 파일
 - `plugins/CH-DamageSkin/skins.yml` : 등록된 스킨 (폰트 -> 이름)

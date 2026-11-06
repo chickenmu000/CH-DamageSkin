@@ -38,6 +38,16 @@ animation:
   # 단계별 글자색 (시작, 올라갈 때, 사라지기 전). 이미지 숫자는 이 색이 곱해져서 어두워집니다. 색 변화를 원치 않으면 모두 #ffffff
   colors: ['#ededed', '#cfcfcf', '#bfbfbf']
 
+# 치명타 : 스크립트(skript-reflect)에서 CHDamageSkin.markCrit(공격자, 피해자) 로 표시한 타격
+crit:
+  enabled: true
+  # 치명타 때 쓸 폰트 (비우면 평소 폰트 그대로). 리소스팩 font json 이름
+  font: ''
+  # 치명타일 때 숫자 크기에 곱해지는 배율
+  scale-multiplier: 1.5
+  # 치명타일 때 단계별 글자색 (비우면 animation.colors 사용)
+  colors: ['#ff5555', '#ff3333', '#cc2222']
+
 # ModelEngine 모델 몹은 모델의 가장 높은 곳을 기준으로 숫자를 띄웁니다. (ModelEngine 이 있을 때만)
 modelengine:
   enabled: true

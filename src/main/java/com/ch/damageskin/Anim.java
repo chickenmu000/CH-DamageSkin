@@ -34,7 +34,13 @@ public final class Anim {
     }
 
     public static Anim read(FileConfiguration c) {
+        return read(c, false);
+    }
+
+    /** crit = true 이면 크기 배율(crit.scale-multiplier)과 색(crit.colors)을 치명타용으로 바꿈 */
+    public static Anim read(FileConfiguration c, boolean crit) {
         float base = (float) c.getDouble("scale", 1.5);
+        if (crit) base *= (float) c.getDouble("crit.scale-multiplier", 1.5);
         float start = (float) c.getDouble("animation.start-scale", 0.5) * base;
         float pop = (float) c.getDouble("animation.pop-scale", 1.35) * base;
         float settle = (float) c.getDouble("animation.settle-scale", 0.85) * base;
@@ -45,6 +51,10 @@ public final class Anim {
         int fadeOut = Math.max(1, c.getInt("animation.fade-out-ticks", 5));
 
         List<String> colors = c.getStringList("animation.colors");
+        if (crit) {
+            List<String> cc = c.getStringList("crit.colors");
+            if (!cc.isEmpty()) colors = cc;
+        }
         String c0 = color(colors, 0, "#ffffff");
         String c1 = color(colors, 1, c0);
         String c2 = color(colors, 2, c1);
