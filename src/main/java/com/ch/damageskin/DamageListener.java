@@ -84,7 +84,9 @@ public class DamageListener implements Listener {
         double yOff = cfg.getDouble("offset", 0.0);
         ThreadLocalRandom rnd = ThreadLocalRandom.current();
 
-        Location base = victim.isValid() ? victim.getLocation() : attacker.getLocation();
+        // 이미 죽은(체력 0) 몹이어도 위치는 그대로 사용 (isValid 로 거르면 플레이어 위치에 떠버림)
+        Location base = victim.getLocation();
+        if (base.getWorld() == null) return;
         Location loc = base.clone().add(
                 (rnd.nextDouble() - 0.5) * 2 * off,
                 height.height(victim) + 0.1 + yOff,
