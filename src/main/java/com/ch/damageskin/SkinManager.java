@@ -199,14 +199,14 @@ public class SkinManager {
     public ItemStack createItem(String font, int amount) {
         ItemStack it = new ItemStack(Material.PAPER, Math.max(1, amount));
         ItemMeta m = it.getItemMeta();
-        m.displayName(CHDamageSkin.c("&6[데미지 스킨] ").decoration(TextDecoration.ITALIC, false)
+        m.displayName(CHDamageSkin.c(CHDamageSkin.tr("item.name", "&6[데미지 스킨] ")).decoration(TextDecoration.ITALIC, false)
                 .append(nameComponent(font)));
         List<Component> lore = new ArrayList<>();
         lore.add(Component.empty());
-        lore.add(CHDamageSkin.c("&7미리보기 ").decoration(TextDecoration.ITALIC, false).append(preview(font)));
+        lore.add(CHDamageSkin.c(CHDamageSkin.tr("item.preview", "&7미리보기 ")).decoration(TextDecoration.ITALIC, false).append(preview(font)));
         lore.add(Component.empty());
-        lore.add(CHDamageSkin.c("&e웅크리고 우클릭하여 등록합니다.").decoration(TextDecoration.ITALIC, false));
-        lore.add(CHDamageSkin.c("&7등록 후 &f/데미지스킨&7 에서 적용할 수 있습니다.").decoration(TextDecoration.ITALIC, false));
+        lore.add(CHDamageSkin.c(CHDamageSkin.tr("item.lore-1", "&e웅크리고 우클릭하여 등록합니다.")).decoration(TextDecoration.ITALIC, false));
+        lore.add(CHDamageSkin.c(CHDamageSkin.tr("item.lore-2", "&7등록 후 &f/데미지스킨&7 에서 적용할 수 있습니다.")).decoration(TextDecoration.ITALIC, false));
         m.lore(lore);
         m.getPersistentDataContainer().set(itemKey, PersistentDataType.STRING, font);
         it.setItemMeta(m);

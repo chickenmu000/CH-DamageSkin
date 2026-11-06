@@ -1,18 +1,89 @@
 # 스킨을 장착하지 않은 유저에게 보여줄 기본 폰트 (리소스팩 assets/minecraft/font/<이름>.json)
 # 비워두면("") 스킨을 장착한 유저에게만 데미지가 표시됩니다.
-default-skin: default
+default-skin: damage_default
 
-# true = 때린 본인에게만 데미지 숫자가 보임 / false = 주변 모두에게 보임
+# true = ProtocolLib 패킷으로 표시 (서버에 엔티티가 생기지 않음, ProtocolLib 필요)
+# false 이거나 ProtocolLib 이 없거나 패킷 전송에 실패하면 TextDisplay 엔티티 방식으로 표시합니다.
+packet-mode: true
+
+# true = 때린 본인에게만 보임 / false = 주변 유저에게도 보임 (other-opacity 투명도로)
 only-attacker: true
 
-# 숫자가 떠 있는 시간(틱, 20틱 = 1초)
-duration-ticks: 25
+# 때린 본인이 아닌 다른 유저가 볼 때의 투명도 (1.0 ~ 0.0) / 보이는 거리(블록)
+other-opacity: 0.5
+view-distance: 24.0
 
-# 숫자가 위로 올라가는 높이(블록)
-rise: 1.2
+# true = 몹에게 실제로 들어간 피해량(체력 감소량)을 표시 / false = 계산된 최종 피해량
+actual-damage-mode: false
 
-# 숫자 크기 배율
+# 숫자가 뜨는 높이 보정(블록)
+offset: 0.0
+
+# 숫자 위치를 좌우로 흩뿌리는 범위(블록)
+random-offset: 0.4
+
+# 숫자 기본 크기 배율 (animation 의 배율에 곱해집니다)
 scale: 1.5
 
-# 숫자가 뜨는 위치를 좌우로 흩뿌리는 범위(블록)
-random-offset: 0.4
+# 애니메이션: 커졌다가(pop) -> 줄어들고(settle) -> 잠시 머문 뒤 위로 올라가며(rise) 어두워집니다.
+animation:
+  start-scale: 0.5
+  pop-scale: 1.35
+  settle-scale: 0.85
+  end-scale: 0.75
+  stay-ticks: 5
+  rise: 1.5
+  rise-ticks: 10
+  fade-out-ticks: 5
+  # 단계별 글자색 (시작, 올라갈 때, 사라지기 전). 이미지 숫자는 이 색이 곱해져서 어두워집니다. 색 변화를 원치 않으면 모두 #ffffff
+  colors: ['#ededed', '#cfcfcf', '#bfbfbf']
+
+# ModelEngine 모델 몹은 모델의 가장 높은 곳을 기준으로 숫자를 띄웁니다. (ModelEngine 이 있을 때만)
+modelengine:
+  enabled: true
+  height-scale: 1.0
+
+# 메시지 / GUI 문구 (&색코드 사용, {name} = 스킨 이름, {font} 등은 해당 메시지에서만 치환)
+messages:
+  prefix: '&d[데미지스킨] &f'
+  player-only: '&c게임 안에서만 사용할 수 있습니다.'
+  no-permission: '&c권한이 없습니다.'
+  unknown-font: '&c등록되지 않은 폰트입니다.'
+  list-empty: '&7등록된 데미지 스킨이 없습니다.'
+  list-header: '&e등록된 데미지 스킨 ({count}개)'
+  list-entry: '&7- &f{font} &8: {name}'
+  register-usage: '&c사용법: /데미지스킨관리 등록 <폰트> <인게임에서 사용 될 이름>'
+  register-invalid-font: '&c폰트 이름은 json 파일 이름(.json 제외)이며 소문자/숫자/_ . - 만 쓸 수 있습니다.'
+  register-added: '{name} &f스킨을 등록했습니다. &7({font})'
+  register-renamed: '{name} &f스킨 이름을 수정했습니다. &7({font})'
+  delete-usage: '&c사용법: /데미지스킨관리 삭제 <폰트>'
+  delete-done: '&e{font} &f스킨을 삭제했습니다. &7(유저가 보유·장착한 기록도 함께 삭제)'
+  give-usage: '&c사용법: /데미지스킨관리 받기 <폰트> [개수]'
+  give-unknown: '&c등록되지 않은 폰트입니다. 먼저 /데미지스킨관리 등록 으로 등록하세요.'
+  give-bad-count: '&c개수는 숫자여야 합니다.'
+  give-done: '{name} &f스킨 아이템을 지급받았습니다.'
+  help-register: '&e/데미지스킨관리 등록 <폰트> <이름>  &7- 폰트 등록 (이름의 _ 는 띄어쓰기, &색코드 가능)'
+  help-give: '&e/데미지스킨관리 받기 <폰트> [개수]  &7- 스킨 아이템 받기'
+  help-delete: '&e/데미지스킨관리 삭제 <폰트>  &7- 등록 삭제'
+  help-list: '&e/데미지스킨관리 목록  &7- 등록된 스킨 목록'
+  sneak-hint: '&e웅크리고(Shift) 우클릭하면 데미지 스킨이 등록됩니다.'
+  skin-deleted: '&c삭제된 데미지 스킨입니다.'
+  already-owned: '&c이미 보유한 데미지 스킨입니다.'
+  registered: '{name} &f스킨이 등록되었습니다! &7(/데미지스킨 에서 적용)'
+  equip-default: '&f기본 데미지 스킨을 적용했습니다.'
+  equip-unavailable: '&c사용할 수 없는 스킨입니다.'
+  equipped: '{name} &f스킨을 적용했습니다.'
+  gui:
+    title: '데미지 스킨'
+    prev: '&a◀ 이전 페이지'
+    next: '&a다음 페이지 ▶'
+    default-name: '&f기본 데미지 스킨'
+    default-none: '&7스킨을 쓰지 않으면 데미지가 표시되지 않습니다.'
+    preview: '&7미리보기 '
+    on: '&a✔ 적용 중'
+    off: '&e▶ 클릭하여 적용'
+  item:
+    name: '&6[데미지 스킨] '
+    preview: '&7미리보기 '
+    lore-1: '&e웅크리고 우클릭하여 등록합니다.'
+    lore-2: '&7등록 후 &f/데미지스킨&7 에서 적용할 수 있습니다.'

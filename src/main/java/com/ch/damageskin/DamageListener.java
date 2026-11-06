@@ -1,37 +1,46 @@
 package com.ch.damageskin;
 
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Display;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
-import org.bukkit.entity.TextDisplay;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.util.Transformation;
-import org.joml.AxisAngle4f;
-import org.joml.Vector3f;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-/** 플레이어가 몹에게 준 피해를 TextDisplay 숫자로 띄움 */
+/** 플레이어가 몹에게 준 피해를 숫자 스킨으로 띄움 */
 public class DamageListener implements Listener {
 
     private final CHDamageSkin plugin;
-    private final Set<TextDisplay> active = new HashSet<>();
+    private final EntityRenderer entityRenderer;
+    private final HeightCalc height;
+    private Renderer packetRenderer;
 
     public DamageListener(CHDamageSkin plugin) {
         this.plugin = plugin;
+        this.entityRenderer = new EntityRenderer(plugin);
+        this.height = new HeightCalc(plugin);
+
+        if (plugin.getConfig().getBoolean("packet-mode", true)) {
+            if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")) {
+                try {
+                    packetRenderer = new PacketRenderer(plugin);
+                    plugin.getLogger().info("패킷 방식으로 데미지를 표시합니다. (ProtocolLib)");
+                } catch (Throwable t) {
+                    plugin.getLogger().warning("패킷 방식 준비 실패 - 엔티티 방식 사용: " + t);
+                }
+            } else {
+                plugin.getLogger().warning("packet-mode 가 켜져 있지만 ProtocolLib 이 없어 엔티티 방식으로 표시합니다.");
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -49,61 +58,66 @@ public class DamageListener implements Listener {
 
         double dmg = e.getFinalDamage();
         if (dmg <= 0) return;
-        long value = Math.max(1, Math.round(dmg));
 
         String font = plugin.skins().activeFont(attacker.getUniqueId());
         if (font == null) return;
+        Key key = SkinManager.fontKey(font);
 
-        show(attacker, victim, value, SkinManager.fontKey(font));
+        if (plugin.getConfig().getBoolean("actual-damage-mode", false)) {
+            // 피해가 적용된 뒤(1틱 후) 체력 차이로 실제 피해량 계산
+            double before = victim.getHealth();
+            Player atk = attacker;
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
+                double after = (victim.isDead() || !victim.isValid()) ? 0 : victim.getHealth();
+                long actual = Math.round(before - after);
+                if (actual <= 0) return;
+                show(atk, victim, actual, key);
+            }, 1L);
+        } else {
+            show(attacker, victim, Math.max(1, Math.round(dmg)), key);
+        }
     }
 
     private void show(Player attacker, LivingEntity victim, long value, Key font) {
         var cfg = plugin.getConfig();
-        int dur = Math.max(5, cfg.getInt("duration-ticks", 25));
-        float rise = (float) cfg.getDouble("rise", 1.2);
-        float scale = (float) cfg.getDouble("scale", 1.5);
         double off = cfg.getDouble("random-offset", 0.4);
-        boolean onlyAttacker = cfg.getBoolean("only-attacker", true);
-
+        double yOff = cfg.getDouble("offset", 0.0);
         ThreadLocalRandom rnd = ThreadLocalRandom.current();
-        Location loc = victim.getLocation().add(
+
+        Location base = victim.isValid() ? victim.getLocation() : attacker.getLocation();
+        Location loc = base.clone().add(
                 (rnd.nextDouble() - 0.5) * 2 * off,
-                victim.getHeight() + 0.1,
+                height.height(victim) + 0.1 + yOff,
                 (rnd.nextDouble() - 0.5) * 2 * off);
 
-        Component text = Component.text(String.valueOf(value)).font(font).color(NamedTextColor.WHITE);
-        Vector3f scaleVec = new Vector3f(scale, scale, scale);
+        List<Player> others = new ArrayList<>();
+        double opacity = cfg.getDouble("other-opacity", 0.5);
+        if (!cfg.getBoolean("only-attacker", true) && opacity > 0) {
+            double range = cfg.getDouble("view-distance", 24.0);
+            for (Player p : loc.getWorld().getPlayers()) {
+                if (p.equals(attacker)) continue;
+                if (p.getLocation().distanceSquared(loc) <= range * range) others.add(p);
+            }
+        }
 
-        TextDisplay td = victim.getWorld().spawn(loc, TextDisplay.class, d -> {
-            d.text(text);
-            d.setBillboard(Display.Billboard.CENTER);
-            d.setBackgroundColor(Color.fromARGB(0, 0, 0, 0));
-            d.setShadowed(false);
-            d.setPersistent(false);
-            d.setInterpolationDuration(dur);
-            d.setTransformation(new Transformation(new Vector3f(), new AxisAngle4f(), scaleVec, new AxisAngle4f()));
-            if (onlyAttacker) d.setVisibleByDefault(false);
-        });
-        if (onlyAttacker) attacker.showEntity(plugin, td);
-        active.add(td);
-
-        // 1틱 뒤에 위로 올라가는 보간 시작
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            if (!td.isValid()) return;
-            td.setInterpolationDelay(0);
-            td.setInterpolationDuration(dur);
-            td.setTransformation(new Transformation(new Vector3f(0, rise, 0), new AxisAngle4f(), scaleVec, new AxisAngle4f()));
-        }, 1L);
-
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            td.remove();
-            active.remove(td);
-        }, dur + 2L);
+        Anim anim = Anim.read(cfg);
+        if (packetRenderer != null) {
+            try {
+                packetRenderer.show(attacker, others, opacity, loc, value, font, anim);
+                return;
+            } catch (Throwable t) {
+                plugin.getLogger().warning("패킷 표시 실패 - 이후 엔티티 방식으로 전환합니다: " + t);
+                t.printStackTrace();
+                packetRenderer.clear();
+                packetRenderer = null;
+            }
+        }
+        entityRenderer.show(attacker, others, opacity, loc, value, font, anim);
     }
 
-    /** 플러그인 종료 / 리로드 시 남은 숫자 제거 */
+    /** 플러그인 종료 시 남은 숫자 제거 */
     public void clearDisplays() {
-        for (TextDisplay td : new HashSet<>(active)) td.remove();
-        active.clear();
+        entityRenderer.clear();
+        if (packetRenderer != null) packetRenderer.clear();
     }
 }

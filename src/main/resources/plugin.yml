@@ -1,6 +1,7 @@
 name: CH-DamageSkin
 main: com.ch.damageskin.CHDamageSkin
-version: 1.0
+version: 1.1
+softdepend: [ProtocolLib, ModelEngine]
 api-version: '1.21'
 description: 리소스팩 폰트로 몹에게 준 데미지를 숫자 스킨으로 표시
 commands:

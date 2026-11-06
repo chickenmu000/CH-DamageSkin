@@ -50,7 +50,7 @@ public class SkinGui implements InventoryHolder {
     }
 
     public void open() {
-        inv = Bukkit.createInventory(this, 54, Component.text("데미지 스킨"));
+        inv = Bukkit.createInventory(this, 54, CHDamageSkin.c(CHDamageSkin.tr("gui.title", "데미지 스킨")));
         render();
         player.openInventory(inv);
     }
@@ -88,8 +88,8 @@ public class SkinGui implements InventoryHolder {
             inv.setItem(i, icon(font, font.equals(eq == null ? "" : eq)));
         }
 
-        if (page > 0) inv.setItem(PREV, nav("&a◀ 이전 페이지"));
-        if (page < maxPage()) inv.setItem(NEXT, nav("&a다음 페이지 ▶"));
+        if (page > 0) inv.setItem(PREV, nav(CHDamageSkin.tr("gui.prev", "&a◀ 이전 페이지")));
+        if (page < maxPage()) inv.setItem(NEXT, nav(CHDamageSkin.tr("gui.next", "&a다음 페이지 ▶")));
     }
 
     private ItemStack nav(String name) {
@@ -107,24 +107,24 @@ public class SkinGui implements InventoryHolder {
         List<Component> lore = new ArrayList<>();
         lore.add(Component.empty());
         if (font.isEmpty()) {
-            m.displayName(CHDamageSkin.c("&f기본 데미지 스킨").decoration(TextDecoration.ITALIC, false));
+            m.displayName(CHDamageSkin.c(CHDamageSkin.tr("gui.default-name", "&f기본 데미지 스킨")).decoration(TextDecoration.ITALIC, false));
             String def = plugin.getConfig().getString("default-skin", "");
             if (def != null && !def.isEmpty() && SkinManager.validFont(def)) {
-                lore.add(CHDamageSkin.c("&7미리보기 ").decoration(TextDecoration.ITALIC, false).append(sm.preview(def)));
+                lore.add(CHDamageSkin.c(CHDamageSkin.tr("gui.preview", "&7미리보기 ")).decoration(TextDecoration.ITALIC, false).append(sm.preview(def)));
             } else {
-                lore.add(CHDamageSkin.c("&7스킨을 쓰지 않으면 데미지가 표시되지 않습니다.").decoration(TextDecoration.ITALIC, false));
+                lore.add(CHDamageSkin.c(CHDamageSkin.tr("gui.default-none", "&7스킨을 쓰지 않으면 데미지가 표시되지 않습니다.")).decoration(TextDecoration.ITALIC, false));
             }
         } else {
             m.displayName(sm.nameComponent(font));
-            lore.add(CHDamageSkin.c("&7미리보기 ").decoration(TextDecoration.ITALIC, false).append(sm.preview(font)));
+            lore.add(CHDamageSkin.c(CHDamageSkin.tr("gui.preview", "&7미리보기 ")).decoration(TextDecoration.ITALIC, false).append(sm.preview(font)));
         }
         lore.add(Component.empty());
         if (on) {
-            lore.add(CHDamageSkin.c("&a✔ 적용 중").decoration(TextDecoration.ITALIC, false));
+            lore.add(CHDamageSkin.c(CHDamageSkin.tr("gui.on", "&a✔ 적용 중")).decoration(TextDecoration.ITALIC, false));
             m.addEnchant(Enchantment.UNBREAKING, 1, true);
             m.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         } else {
-            lore.add(CHDamageSkin.c("&e▶ 클릭하여 적용").decoration(TextDecoration.ITALIC, false));
+            lore.add(CHDamageSkin.c(CHDamageSkin.tr("gui.off", "&e▶ 클릭하여 적용")).decoration(TextDecoration.ITALIC, false));
         }
         m.lore(lore);
         it.setItemMeta(m);
