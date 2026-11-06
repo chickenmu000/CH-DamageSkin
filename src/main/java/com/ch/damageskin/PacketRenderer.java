@@ -6,6 +6,7 @@ import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedDataValue;
+import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher.Registry;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -57,6 +58,32 @@ public class PacketRenderer implements Renderer {
         iText = 23 - shift;
         iBackground = 25 - shift;
         iOpacity = 26 - shift;
+    }
+
+    private WrappedDataWatcher.Serializer vecSerializer;
+
+    /** ProtocolLib 에 joml Vector3f 용 시리얼라이저가 없어서, NMS EntityDataSerializers.VECTOR3 에서 직접 가져옴 */
+    private WrappedDataWatcher.Serializer vectorSerializer() {
+        if (vecSerializer != null) return vecSerializer;
+        try {
+            Class<?> eds = Class.forName("net.minecraft.network.syncher.EntityDataSerializers");
+            Object handle = eds.getField("VECTOR3").get(null);
+            WrappedDataWatcher.Serializer ser = null;
+            try {
+                java.lang.reflect.Method m = Registry.class.getMethod("fromHandle", Object.class);
+                ser = (WrappedDataWatcher.Serializer) m.invoke(null, handle);
+            } catch (NoSuchMethodException ignored) {
+            }
+            if (ser == null) {
+                ser = WrappedDataWatcher.Serializer.class
+                        .getConstructor(Class.class, Object.class, boolean.class)
+                        .newInstance(Vector3f.class, handle, false);
+            }
+            vecSerializer = ser;
+            return ser;
+        } catch (ReflectiveOperationException ex) {
+            throw new IllegalStateException("Vector3f 시리얼라이저를 찾지 못했습니다", ex);
+        }
     }
 
     private static boolean atLeast(int major, int minor, int patch) {
@@ -118,6 +145,7 @@ public class PacketRenderer implements Renderer {
         }
 
         private WrappedDataValue val(int idx, Class<?> type, Object v) {
+            if (type == Vector3f.class) return new WrappedDataValue(idx, vectorSerializer(), v);
             return new WrappedDataValue(idx, Registry.get(type), v);
         }
 
